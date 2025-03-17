@@ -1,0 +1,36 @@
+version: '3.3'
+
+services:
+  web-server:
+    image: web-server:latest
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./web-server:/app
+    networks:
+      - yolo-network
+    depends_on:
+      - yolo-detector
+
+  yolo-detector:
+    image: yolo-detector:latest
+    # image: net:0.1
+    volumes:
+      - ./yolo-detector:/app
+      - ./yolo-detector/models:/app/models:ro  # Mount models as read-only
+      - /dev/video0:/dev/video0
+    devices:
+      - /dev/video0:/dev/video0
+    environment:
+      - PYTHONUNBUFFERED=1
+      - CUDA_VISIBLE_DEVICES=
+      - FORCE_CPU=1
+    command: ["python", "detector_orig.py", "--device", "cpu", "--conf", "0.3", "--model", "yolov8n.pt"]
+    # command: python net.py --conf 0.4 --model-dir /app/models
+
+    networks:
+      - yolo-network
+
+networks:
+  yolo-network:
+    driver: bridge

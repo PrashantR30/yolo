@@ -1,0 +1,28 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+RUN pip install --no-cache-dir \
+    opencv-python==4.7.0.72 \
+    numpy==1.24.3 \
+    urllib3==2.0.3
+
+# Create directory for models
+RUN mkdir -p /app/models
+
+# Expose port for streaming
+EXPOSE 5555
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1

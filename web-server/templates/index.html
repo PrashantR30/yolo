@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO Object Detection</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .video-container {
+            margin: 20px auto;
+            text-align: center;
+        }
+        #video-feed {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e0f7fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>YOLO Object Detection</h1>
+        
+        <div class="video-container">
+            <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Stream">
+        </div>
+        
+        <div class="status" id="status">
+            Status: Waiting for connection to YOLO detector...
+        </div>
+        
+        <div class="footer">
+            <p>Real-time object detection using YOLOv8</p>
+        </div>
+    </div>
+
+    <script>
+        // Connect to Socket.IO server
+        const socket = io();
+        const videoFeed = document.getElementById('video-feed');
+        const statusDisplay = document.getElementById('status');
+        
+        // Listen for video frames from the server
+        socket.on('video_frame', function(data) {
+            // Update the image with the received frame
+            videoFeed.src = 'data:image/jpeg;base64,' + data.image;
+            
+            // Update status
+            statusDisplay.innerText = 'Status: Connected to YOLO detector';
+            statusDisplay.style.backgroundColor = '#e8f5e9';
+        });
+        
+        // Handle disconnect events
+        socket.on('disconnect', function() {
+            statusDisplay.innerText = 'Status: Disconnected from server';
+            statusDisplay.style.backgroundColor = '#ffebee';
+        });
+        
+        // Handle connect events
+        socket.on('connect', function() {
+            statusDisplay.innerText = 'Status: Connected to server, waiting for YOLO detector...';
+            statusDisplay.style.backgroundColor = '#fff8e1';
+        });
+    </script>
+</body>
+</html>

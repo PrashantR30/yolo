@@ -1,0 +1,37 @@
+version: '3.3'
+
+services:
+  web-server:
+    image: web-server:latest
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./web-server:/app
+    networks:
+      - yolo-network
+    depends_on:
+      - yolo-detector
+
+  yolo-detector:
+    image: yolo-detector:gpu
+    volumes:
+      - ./yolo-detector:/app
+      - /dev/video0:/dev/video0
+    devices:
+      - /dev/video0:/dev/video0
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["python", "detector.py", "--device", "gpu"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - yolo-network
+
+networks:
+  yolo-network:
+    driver: bridge
